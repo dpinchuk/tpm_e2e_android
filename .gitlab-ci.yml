@@ -1,0 +1,40 @@
+image: inovex/gitlab-ci-android
+
+stages:
+  - build
+  - test
+  - android_ui_tests
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx3g"
+  # Опционально: отключить Gradle daemon, задать heap
+
+cache:
+  key: ${CI_PROJECT_ID}
+  paths:
+    - .gradle/
+
+before_script:
+  # Градл должен быть исполняемым
+  - chmod +x ./gradlew
+  # Выбираем нужную версию Java (JDK 17)
+  - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+  - export PATH="$JAVA_HOME/bin:$PATH"
+
+build_debug:
+  stage: build
+  script:
+    - ./gradlew clean assembleDebug
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - app/build/outputs/apk/debug/*.apk
+
+unit_tests:
+  stage: test
+  script:
+    - ./gradlew testDebugUnitTest
+  artifacts:
+    when: always
+    reports:
+      junit: app/build/test-results/testDebugUnitTest/*.xml
