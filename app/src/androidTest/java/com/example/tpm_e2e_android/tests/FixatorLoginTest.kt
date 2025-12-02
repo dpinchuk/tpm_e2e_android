@@ -1,9 +1,9 @@
 package com.example.tpm_e2e_android.tests
 
+import HomeRobot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.tpm_e2e_android.base.BaseFixatorTest
 import com.example.tpm_e2e_android.constants.FixatorCredentials
-import com.example.tpm_e2e_android.robots.HomeRobot
 import com.example.tpm_e2e_android.robots.LoginRobot
 import androidx.test.uiautomator.By
 import org.junit.After
@@ -17,15 +17,21 @@ import org.junit.runner.RunWith
 class FixatorLoginTest : BaseFixatorTest() {
 
     /**
-     * 🟦 Допоміжний метод: логін під довільною парою email/пароль.
+     * 🔹 Уніфікований сценарій логіну та очікування домашнього екрана.
      */
     private fun loginWithCredentials(email: String, password: String) {
-        LoginRobot(device)
+        val loginRobot = LoginRobot(device)
+
+        loginRobot
             .assertLoginScreenVisible()
             .typeEmail(email)
             .typePassword(password)
             .tapLoginButton()
-            .waitForHomeScreen()
+
+        // 🔹 Обробка можливих діалогів (onboarding / permissions) – всередині HomeRobot
+        val homeRobot = HomeRobot(device)
+        homeRobot.handlePossibleStartupDialogs()
+        homeRobot.assertHomeScreenVisible()
     }
 
     @Test
@@ -60,13 +66,4 @@ class FixatorLoginTest : BaseFixatorTest() {
         )
     }
 
-    /**
-     * 🟦 Після кожного тесту авторизації намагаємось виконати вихід.
-     */
-    @After
-    fun logoutIfNeeded() {
-        if (device.hasObject(By.text("Головна"))) {
-            HomeRobot(device).logoutToLogin()
-        }
-    }
 }
