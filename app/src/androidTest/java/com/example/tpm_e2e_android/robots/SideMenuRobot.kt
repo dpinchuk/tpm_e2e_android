@@ -188,4 +188,85 @@ class SideMenuRobot(
         incomingItem!!.click()
         return this
     }
+
+    fun openOutgoingDocuments(timeoutMs: Long = 25_000): SideMenuRobot {
+        // Wait until E-Office screen / menu is visible
+        device.wait(
+            Until.hasObject(By.textContains("Е-канцел")),
+            timeoutMs
+        )
+
+        var outgoingItem: UiObject2? = null
+
+        // 1) Try exact text "Вихідні документи"
+        outgoingItem = device.findObject(By.textContains("Вихідні документи"))
+
+        // 2) Fallback: any text containing "Вихідн"
+        if (outgoingItem == null) {
+            val candidates = device.findObjects(By.clazz("android.widget.TextView"))
+            outgoingItem = candidates.firstOrNull { obj ->
+                val t = obj.text ?: ""
+                t.contains("Вихідн", ignoreCase = true)
+            }
+        }
+
+        if (outgoingItem == null) {
+            val texts = device.findObjects(By.clazz("android.widget.TextView"))
+                .take(15)
+                .joinToString("\n") { obj ->
+                    "text='${obj.text}', resId='${obj.resourceName}'"
+                }
+
+            fail(
+                "Outgoing documents menu item was not found. " +
+                        "Tried text 'Вихідні документи' and contains('Вихідн'). " +
+                        "Visible TextViews:\n$texts"
+            )
+        }
+
+        outgoingItem!!.click()
+        return this
+    }
+
+    fun openTasks(timeoutMs: Long = 25_000): SideMenuRobot {
+        // Side menu may already be visible; if there is a menu button, try to use it
+        openSideMenu(timeoutMs)
+
+        device.wait(
+            Until.hasObject(By.clazz("android.widget.TextView")),
+            timeoutMs
+        )
+
+        var tasksItem: UiObject2? = null
+
+        // 1) Exact text "Задачі"
+        tasksItem = device.findObject(By.textContains("Задачі"))
+
+        // 2) Fallback: any text containing "Задач"
+        if (tasksItem == null) {
+            val candidates = device.findObjects(By.clazz("android.widget.TextView"))
+            tasksItem = candidates.firstOrNull { obj ->
+                val t = obj.text ?: ""
+                t.contains("Задач", ignoreCase = true)
+            }
+        }
+
+        if (tasksItem == null) {
+            val texts = device.findObjects(By.clazz("android.widget.TextView"))
+                .take(20)
+                .joinToString("\n") { obj ->
+                    "text='${obj.text}', resId='${obj.resourceName}'"
+                }
+
+            fail(
+                "Tasks menu item was not found in side menu. " +
+                        "Tried 'Задачі' and contains('Задач'). Visible TextViews:\n$texts"
+            )
+        }
+
+        tasksItem!!.click()
+        return this
+    }
+
+
 }

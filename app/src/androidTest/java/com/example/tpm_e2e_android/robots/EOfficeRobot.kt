@@ -69,4 +69,53 @@ class EOfficeRobot(
         candidate.click()
         return this
     }
+
+    fun assertOutgoingDocumentsScreenVisible(timeoutMs: Long = 30_000): EOfficeRobot {
+        val appeared = device.wait(
+            Until.hasObject(
+                // Page title "Вихідні документи"
+                By.textContains("Вихідні документи")
+            ),
+            timeoutMs
+        )
+
+        assertTrue(
+            "Outgoing documents screen did not appear within $timeoutMs ms. " +
+                    "Maybe the title text has changed or screen loaded too slowly.",
+            appeared
+        )
+
+        return this
+    }
+
+    /**
+     * Checks that outgoing documents table has at least one row.
+     */
+    fun assertOutgoingDocumentsListNotEmpty(): EOfficeRobot {
+        val scrollable = UiScrollable(UiSelector().scrollable(true))
+
+        // Try to scroll to top just in case
+        try {
+            scrollable.scrollToBeginning(10)
+        } catch (_: Exception) {
+            // ignore if not scrollable
+        }
+
+        val firstRow = try {
+            scrollable.getChildByInstance(
+                UiSelector().clickable(true),
+                0
+            )
+        } catch (e: Exception) {
+            null
+        }
+
+        assertTrue(
+            "Outgoing documents list appears to be empty or table structure is different.",
+            firstRow != null
+        )
+
+        return this
+    }
+
 }

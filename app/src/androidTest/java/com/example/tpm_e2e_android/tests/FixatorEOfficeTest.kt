@@ -40,4 +40,28 @@ class FixatorEOfficeTest : BaseFixatorTest() {
             .openFirstIncomingDocument()
     }
 
+    @Test
+    fun clerkCanSeeOutgoingDocumentsList() {
+        // Login as Clerk
+        LoginRobot(device)
+            .assertLoginScreenVisible()
+            .typeEmail(FixatorCredentials.CLERK_LOGIN)
+            .typePassword(FixatorCredentials.CLERK_PASSWORD)
+            .tapLoginButton()
+
+        HomeRobot(device)
+            .assertHomeScreenVisible()
+
+        // Navigate to E-Office → Outgoing documents
+        SideMenuRobot(device)
+            .openEOffice()
+            .openOutgoingDocuments()
+
+        // Verify outgoing documents screen and list
+        EOfficeRobot(device)
+            .assertOutgoingDocumentsScreenVisible()
+            .assertOutgoingDocumentsListNotEmpty()
+    }
+
+
 }
