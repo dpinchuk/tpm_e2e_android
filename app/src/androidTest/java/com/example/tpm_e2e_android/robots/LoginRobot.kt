@@ -18,7 +18,7 @@ class LoginRobot(
      * ✅ Check that login screen is visible.
      * If login is not visible but home is already shown – we do NOT fail.
      */
-    fun assertLoginScreenVisible(timeoutMs: Long = 15_000): LoginRobot {
+    fun assertLoginScreenVisible(timeoutMs: Long = 60_000): LoginRobot {
         // Possible markers of login screen
         val loginMarkers = listOf(
             By.textContains("Логін"),
@@ -147,7 +147,6 @@ class LoginRobot(
      * Tries resource-id first, then falls back to text search.
      */
     fun tapLoginButton(): LoginRobot {
-        // TODO: if you know the real resource-id of login button – set it here.
         val LOGIN_BUTTON_RES_ID = "" // e.g. "ua.com.fixator.app:id/btnLogin"
 
         var button: UiObject2? = null

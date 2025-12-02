@@ -5,8 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.tpm_e2e_android.base.BaseFixatorTest
 import com.example.tpm_e2e_android.constants.FixatorCredentials
 import com.example.tpm_e2e_android.robots.LoginRobot
-import androidx.test.uiautomator.By
-import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 

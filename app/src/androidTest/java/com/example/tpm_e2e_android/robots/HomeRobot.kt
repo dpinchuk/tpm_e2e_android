@@ -2,6 +2,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import org.junit.Assert.fail
 
 class HomeRobot(
     private val device: UiDevice = UiDevice.getInstance(
@@ -14,50 +15,51 @@ class HomeRobot(
     private val MENU_BUTTON_TEXT = "Меню"
 
     /**
-     * Soft-check: try to detect home screen.
-     *
-     * If we don't see "Е-канцелярія", we do NOT fail the test.
-     * We only fail if there is no UI from our app at all.
+     * ✅ Strict wait for home screen.
+     * We consider home screen visible when we see either:
+     *  - text "Е-канцелярія", or
+     *  - a menu button (desc contains "menu"), or
+     *  - a button/text "Меню".
      */
-    fun assertHomeScreenVisible(timeoutMs: Long = 15_000): HomeRobot {
-        // Wait for any UI object from our package
-        val appearedAny = device.wait(
-            Until.hasObject(By.pkg("ua.com.fixator.app")),
-            timeoutMs
-        )
+    fun assertHomeScreenVisible(timeoutMs: Long = 60_000): HomeRobot {
+        val start = System.currentTimeMillis()
+        var isHome = false
 
-        if (!appearedAny) {
-            throw AssertionError(
-                "Fixator app UI did not appear within $timeoutMs ms. " +
-                        "Check that the app is installed and MAIN_ACTIVITY is correct."
-            )
+        while (System.currentTimeMillis() - start < timeoutMs && !isHome) {
+            // App UI at all?
+            val anyAppUi = device.hasObject(By.pkg("ua.com.fixator.app"))
+            if (anyAppUi) {
+                val hasEoffice = device.hasObject(By.text(HOME_EOFFICE_MENU_TEXT))
+                val hasMenuDesc = device.hasObject(By.descContains("menu"))
+                val hasMenuText = device.hasObject(By.textContains(MENU_BUTTON_TEXT))
+
+                if (hasEoffice || hasMenuDesc || hasMenuText) {
+                    isHome = true
+                    break
+                }
+            }
+            Thread.sleep(500)
         }
 
-        // Try to find "Е-канцелярія" text
-        val hasEoffice = device.hasObject(By.text(HOME_EOFFICE_MENU_TEXT))
-
-        if (!hasEoffice) {
-            // Debug: show some visible text elements (TextViews)
+        if (!isHome) {
             val textViews = device.findObjects(By.clazz("android.widget.TextView"))
             val debugInfo = textViews
-                .take(10)
-                .joinToString(separator = "\n") { obj ->
+                .take(15)
+                .joinToString("\n") { obj ->
                     "text='${obj.text}', resId='${obj.resourceName}'"
                 }
 
-            println(
-                "WARN: Home screen marker '$HOME_EOFFICE_MENU_TEXT' was not found. " +
-                        "Continuing anyway. Some visible TextViews:\n$debugInfo"
+            fail(
+                "Home screen did not become visible within $timeoutMs ms. " +
+                        "Expected to see either \"$HOME_EOFFICE_MENU_TEXT\", a 'menu' button, or text '$MENU_BUTTON_TEXT'. " +
+                        "Some visible TextViews:\n$debugInfo"
             )
         }
 
         return this
     }
 
-    /**
-     * Handle possible startup dialogs (permissions / onboarding).
-     */
-    fun handlePossibleStartupDialogs(timeoutMs: Long = 5_000): HomeRobot {
+    fun handlePossibleStartupDialogs(timeoutMs: Long = 60_000): HomeRobot {
         val allowTexts = listOf("Дозволити", "Allow", "OK")
 
         val start = System.currentTimeMillis()
@@ -77,10 +79,7 @@ class HomeRobot(
         return this
     }
 
-    /**
-     * Try to logout if we are on home screen. If not – do nothing.
-     */
-    fun logoutIfLoggedIn(timeoutMs: Long = 3_000) {
+    fun logoutIfLoggedIn(timeoutMs: Long = 60_000) {
         val isHomeVisible = device.wait(
             Until.hasObject(By.text(HOME_EOFFICE_MENU_TEXT)),
             timeoutMs

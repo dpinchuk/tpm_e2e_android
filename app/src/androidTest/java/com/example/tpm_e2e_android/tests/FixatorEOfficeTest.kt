@@ -7,7 +7,6 @@ import com.example.tpm_e2e_android.constants.FixatorCredentials
 import com.example.tpm_e2e_android.robots.EOfficeRobot
 import com.example.tpm_e2e_android.robots.LoginRobot
 import com.example.tpm_e2e_android.robots.SideMenuRobot
-import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 

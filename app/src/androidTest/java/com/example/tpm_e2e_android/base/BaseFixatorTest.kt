@@ -13,7 +13,7 @@ import org.junit.Before
 
 private const val APP_PACKAGE = "ua.com.fixator.app"
 private const val MAIN_ACTIVITY = "crc641e3e720e8099bf3e.MainActivity"
-private const val LAUNCH_TIMEOUT = 40_000L
+private const val LAUNCH_TIMEOUT = 60_000L
 
 abstract class BaseFixatorTest {
 

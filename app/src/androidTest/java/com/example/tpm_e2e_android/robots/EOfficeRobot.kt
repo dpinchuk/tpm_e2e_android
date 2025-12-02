@@ -11,10 +11,10 @@ class EOfficeRobot(
 ) {
 
     /**
-     * ✅ Check that "Incoming documents" screen is visible.
-     * Uses text instead of resource-id to avoid fragile selectors.
+     * Check that "Incoming documents" screen is visible.
+     * Uses text "Вхідн" and a long timeout because emulator is slow.
      */
-    fun assertIncomingDocumentsScreenVisible(timeoutMs: Long = 10_000): EOfficeRobot {
+    fun assertIncomingDocumentsScreenVisible(timeoutMs: Long = 60_000): EOfficeRobot {
         val appeared = device.wait(
             Until.hasObject(
                 By.textContains("Вхідн") // "Вхідні", "Вхідні документи", etc.
@@ -24,7 +24,7 @@ class EOfficeRobot(
 
         assertTrue(
             "Incoming documents screen did not appear within $timeoutMs ms. " +
-                    "Maybe the title text has changed or a different screen is shown.",
+                    "Maybe the title text has changed or screen loaded too slowly.",
             appeared
         )
 
@@ -32,16 +32,15 @@ class EOfficeRobot(
     }
 
     /**
-     * ✅ Open the first incoming document in the list.
+     * Open the first incoming document in the list.
      */
     fun openFirstIncomingDocument(): EOfficeRobot {
-        // Try to use first scrollable list on the screen
         val scrollable = UiScrollable(UiSelector().scrollable(true))
 
         try {
             scrollable.scrollToBeginning(10)
         } catch (_: Exception) {
-            // ignore if list is not scrollable
+            // ignore if not scrollable
         }
 
         val firstItem = try {
@@ -58,7 +57,6 @@ class EOfficeRobot(
             return this
         }
 
-        // Fallback: any clickable element with non-empty text
         val candidates = device.findObjects(By.clickable(true))
         val candidate = candidates.firstOrNull {
             val text = it.text
